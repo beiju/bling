@@ -1,0 +1,15 @@
+[package]
+name = "bling"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = { version = "0.5.0-rc.1", features=["uuid", "serde_json"] }
+serde = "1.0.136"
+serde_json = "1.0.79"
+chrono = { version = "0.4.19", features=["serde"] }
+reqwest = "0.11.9"
+piet-common = "0.5.0"
+png = "0.17.3"
