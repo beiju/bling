@@ -3,10 +3,8 @@ use rocket::serde::uuid::Uuid;
 
 use crate::chronicler_schema::{ChroniclerGame, ChroniclerGameResponse, ChroniclerGameUpdate, ChroniclerGameUpdatesResponse, GameUpdateData};
 
-pub fn game_updates_for_team(_team: Uuid) -> impl Stream<Item=GameUpdateData> {
-    // For testing
-    game_updates_for_game(Uuid::parse_str("4cc78f38-36b7-4282-baa6-21ff46a41e56").unwrap())
-    // games_for_team(team).flat_map(game_updates_for_game)
+pub fn game_updates_for_team(team: Uuid) -> impl Stream<Item=GameUpdateData> {
+    games_for_team(team).flat_map(game_updates_for_game)
 }
 
 pub fn games_for_team(team: Uuid) -> impl Stream<Item=Uuid> {
@@ -48,6 +46,8 @@ async fn games_for_team_page(team_id: Uuid, state: ChronState) -> (Vec<Chronicle
     let request = state.client
         .get("https://api.sibr.dev/chronicler/v1/games")
         .query(&[("team", &team_id)])
+        // Before this time, the only recorded update we have for every game is "Game Over."
+        .query(&[("after", "2020-07-29T04:00:00.001Z")])
         .query(&[("order", "asc")]);
 
     let request = match state.page {
@@ -101,7 +101,8 @@ fn game_update_pages(game_id: Uuid) -> impl Stream<Item=Vec<ChroniclerGameUpdate
 async fn game_update_page(game_id: Uuid, state: ChronState) -> (Vec<ChroniclerGameUpdate>, ChronState) {
     let request = state.client
         .get("https://api.sibr.dev/chronicler/v1/games/updates")
-        .query(&[("id", &game_id)])
+        .query(&[("game", &game_id)])
+        .query(&[("started", true)])
         .query(&[("order", "asc")]);
 
     let request = match state.page {

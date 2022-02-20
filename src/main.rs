@@ -4,13 +4,14 @@ mod game_states;
 mod render;
 
 #[macro_use] extern crate rocket;
+extern crate core;
 
 use std::collections::HashMap;
 use rocket::State;
 use rocket::http::{ContentType, Status};
 use rocket::serde::uuid::Uuid;
 use rocket::tokio::sync::Mutex;
-use rocket::response::{content, status};
+use rocket::response::content;
 
 use crate::game_states::GameStates;
 use crate::render::render;
@@ -32,6 +33,7 @@ async fn game_img(team_map: &State<TeamMapSync>, team_id: Uuid) -> Result<conten
 
     match game_update {
         Some(update) => {
+            info!("Rendering {:?}", update);
             match render(update) {
                 Ok(buf) => Ok(content::Custom(ContentType::PNG, buf)),
                 Err(err) => {

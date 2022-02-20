@@ -20,6 +20,17 @@ impl GameStates {
     }
 
     pub async fn next(&mut self) -> Option<GameUpdateData> {
+        while let Some(update) = self.next_inner().await {
+            if update.last_update != "Game over." {
+                return Some(update);
+            }
+            info!("Skipping Game Over");
+        }
+
+        None
+    }
+
+    pub async fn next_inner(&mut self) -> Option<GameUpdateData> {
         match self.stream.next().await {
             Some(update) => {
                 self.started = true;
